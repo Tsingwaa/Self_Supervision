@@ -2,7 +2,7 @@
 * @Author: Tsingwaa Tsang
 * @Date: 2020-02-06 15:09:19
 @LastEditors: Tsingwaa Tsang
-@LastEditTime: 2020-02-11 00:46:33
+@LastEditTime: 2020-02-11 00:50:53
 * @Description: Null
 """
 
@@ -19,6 +19,13 @@ my_resnet = deepcopy(resnet18(True))
 
 class Net(nn.Module):
     def __init__(self, model, num_classes, aug_classes):
+        """
+        @Description: this is to modify the input model by replace the last layer with 8 parallel layers.
+
+        @Param model: The input model 
+        @Param num_classes: the classes of original images
+        @Param aug_classes: the extra classes of augmented images
+        """
 
         super(Net, self).__init__()
         # 先去除最后一层fc层
