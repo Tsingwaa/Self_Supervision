@@ -1,6 +1,17 @@
+"""
+* @Author: Tsingwaa Tsang
+* @Date: 2020-02-06 15:09:19
+* @LastEditors: Tsingwaa Tsang
+* @LastEditTime: 2020-02-11 00:01:07
+* @Description: Null
+"""
+
+
 import torch.nn as nn
 import torch.nn.functional as F
 from base import BaseModel
+from torchvision.models import resnet18
+from copy import deepcopy
 
 
 class MnistModel(BaseModel):
@@ -20,3 +31,15 @@ class MnistModel(BaseModel):
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
+
+
+my_resnet = deepcopy(resnet18(True))
+
+
+class Net(nn.Module):
+    def __init__(self, model, num_classes, aug_classes):
+        super(Net, self).__init__()
+        # 先去除最后一层fc层
+        self.resnet_layer = nn.Sequential(*list(model.children())[:-1])
+        # 再定义四类的fc层
+        self.fc1 = nn.Linear(model.fc.in_features, aug_classes)
