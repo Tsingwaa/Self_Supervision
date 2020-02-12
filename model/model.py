@@ -1,20 +1,16 @@
 """
-* @Author: Tsingwaa Tsang
-* @Date: 2020-02-06 15:09:19
+@Author: Tsingwaa Tsang
+@Date: 2020-02-06 15:09:19
 @LastEditors: Tsingwaa Tsang
-@LastEditTime: 2020-02-11 00:50:53
-* @Description: Null
+@LastEditTime: 2020-02-12 16:15:11
+@Description: Null
 """
 
 
 import torch.nn as nn
 import torch.nn.functional as F
-from base import BaseModel
 from torchvision.models import resnet18
 from copy import deepcopy
-
-
-my_resnet = deepcopy(resnet18(True))
 
 
 class Net(nn.Module):
@@ -47,7 +43,7 @@ class Net(nn.Module):
         @Param x: the input image
         @Param label: the label of the input image
 
-        @Return: 
+        @Return: the output score
         """
 
         fc_dict = {
@@ -58,3 +54,6 @@ class Net(nn.Module):
         output_x = fc_dict[label](output_x)
 
         return output_x
+
+
+# my_resnet = deepcopy(resnet18(True))
