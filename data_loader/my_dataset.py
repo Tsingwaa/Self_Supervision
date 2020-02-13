@@ -2,19 +2,20 @@
 @Author: Tsingwaa Tsang
 @Date: 2020-02-07 21:53:29
 @LastEditors: Tsingwaa Tsang
-@LastEditTime: 2020-02-13 23:09:00
+@LastEditTime: 2020-02-13 23:10:56
 @Description: Null
 """
 
 from torch.utils.data.dataset import Dataset
 from torch.utils.data import DataLoader
 from torchvision import transforms as T
+from PIL import Image
 
 
-class MyCustomDataset(Dataset):
-    def __init__(self, path, transforms=None):
+class MyCustomMnist(Dataset):
+    def __init__(self, root, transforms=None):
         # stuff
-        ...
+
         self.transforms = transforms
 
     def __getitem__(self, index):
