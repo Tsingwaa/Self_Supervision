@@ -1,10 +1,18 @@
+"""
+@Author: Tsingwaa Tsang
+@Date: 2020-02-07 21:53:29
+@LastEditors: Tsingwaa Tsang
+@LastEditTime: 2020-02-13 23:09:00
+@Description: Null
+"""
+
 from torch.utils.data.dataset import Dataset
 from torch.utils.data import DataLoader
 from torchvision import transforms as T
 
 
 class MyCustomDataset(Dataset):
-    def __init__(self, transforms=None):
+    def __init__(self, path, transforms=None):
         # stuff
         ...
         self.transforms = transforms

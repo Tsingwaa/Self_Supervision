@@ -2,7 +2,7 @@
 @Author: Tsingwaa Tsang
 @Date: 2020-02-06 15:09:19
 @LastEditors: Tsingwaa Tsang
-@LastEditTime: 2020-02-13 22:51:47
+@LastEditTime: 2020-02-13 22:53:54
 @Description: Null
 """
 
@@ -57,6 +57,7 @@ class Net(nn.Module):
             output_x = fc_dict[label](output_x)
             output_x = self.softmax(output_x)
         elif stage == "test":
+            # 测试时，输出通过所有分类器
             output_x1 = self.fc1(output_x)
             output_x2 = self.fc2(output_x)
             output_x3 = self.fc3(output_x)
