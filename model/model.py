@@ -2,7 +2,7 @@
 @Author: Tsingwaa Tsang
 @Date: 2020-02-06 15:09:19
 @LastEditors: Tsingwaa Tsang
-@LastEditTime: 2020-02-13 22:39:36
+@LastEditTime: 2020-02-13 22:51:47
 @Description: Null
 """
 
@@ -41,7 +41,7 @@ class Net(nn.Module):
         @Description:
 
         @Param x: the input image
-        @Param label: the label of the input image
+        @Param label: the label of the origin input image
         @Param stage: train or test
         @Param concate: bool symbool. concate the 8 output or not.
 
