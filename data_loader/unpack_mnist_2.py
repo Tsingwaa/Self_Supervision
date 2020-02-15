@@ -1,3 +1,11 @@
+"""
+@Author: Tsingwaa Tsang
+@Date: 2020-02-07 22:04:30
+@LastEditors: Tsingwaa Tsang
+@LastEditTime: 2020-02-15 17:12:21
+@Description: Null
+"""
+
 import numpy as np
 import numpy as np
 import struct
@@ -45,11 +53,20 @@ def load_labels(file_name):
     return labels
 
 
-filename_train_images = '绝对路径\\train-images.idx3-ubyte'
-filename_train_labels = '绝对路径\\train-labels.idx1-ubyte'
-filename_test_images = '绝对路径\\t10k-images.idx3-ubyte'
-filename_test_labels = '绝对路径\\t10k-labels.idx1-ubyte'
-train_images = load_images(filename_train_images)
-train_labels = load_labels(filename_train_labels)
-test_images = load_images(filename_test_images)
-test_labels = load_labels(filename_test_labels)
+train_images_path = "D:/Dataset/Mnist/train-images.idx3-ubyte"
+train_labels_path = "D:/Dataset/Mnist/train-labels.idx1-ubyte"
+test_images_path = "D:/Dataset/Mnist/t10k-images.idx3-ubyte"
+test_labels_path = "D:/Dataset/Mnist/t10k-labels.idx1-ubyte"
+train_images = load_images(train_images_path)
+train_labels = load_labels(train_labels_path)
+test_images = load_images(test_images_path)
+test_labels = load_labels(test_labels_path)
+
+cnt = 1
+for img in train_images:
+    if cnt == 1:
+        cnt = 2
+        print(img.shape)
+        print(img)
+        print(train_images.shape)
+        break

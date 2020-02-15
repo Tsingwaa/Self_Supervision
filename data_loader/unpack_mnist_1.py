@@ -2,13 +2,14 @@
 @Author: Tsingwaa Tsang
 @Date: 2020-02-14 00:56:47
 @LastEditors: Tsingwaa Tsang
-@LastEditTime: 2020-02-14 00:57:13
+@LastEditTime: 2020-02-15 18:10:53
 @Description: Null
 """
 
 import numpy as np
 import struct
 import os
+from PIL import Image
 
 
 def load_mnist_train(path, kind='train'):
@@ -19,7 +20,8 @@ def load_mnist_train(path, kind='train'):
         labels = np.fromfile(lbpath, dtype=np.uint8)
     with open(images_path, 'rb') as imgpath:
         magic, num, rows, cols = struct.unpack('>IIII', imgpath.read(16))
-        images = np.fromfile(imgpath, dtype=np.uint8).reshape(len(labels), 784)
+        images = np.fromfile(imgpath, dtype=np.uint8).reshape(
+            len(labels), 28, 28)
     return images, labels
 
 
@@ -31,10 +33,13 @@ def load_mnist_test(path, kind='t10k'):
         labels = np.fromfile(lbpath, dtype=np.uint8)
     with open(images_path, 'rb') as imgpath:
         magic, num, rows, cols = struct.unpack('>IIII', imgpath.read(16))
-        images = np.fromfile(imgpath, dtype=np.uint8).reshape(len(labels), 784)
+        images = np.fromfile(imgpath, dtype=np.uint8).reshape(
+            len(labels), 28, 28)
     return images, labels
 
 
-path = '绝对路径'
+path = 'D:/Dataset/Mnist/'
 train_images, train_labels = load_mnist_train(path)
 test_images, test_labels = load_mnist_test(path)
+
+cnt_array = np.zeros[10]
