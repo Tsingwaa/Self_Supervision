@@ -29,9 +29,8 @@ class MnistDataLoader(BaseDataLoader):
 
 
 trfms = T.Compose([
-    T.Resize(224, 224),
     T.ToTensor(),
-    T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    T.Normalize((0.1307,), (0.3081,)),
 ])
 root = './data'
 # 创建 dataset

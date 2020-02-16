@@ -12,7 +12,53 @@ from torchvision.models import resnet18
 from copy import deepcopy
 
 
-class Net(nn.Module):
+class Net1FC(nn.Module):
+
+    def __init__(self, model, all_classes):
+        """
+        @Description: this is to modify the input model by replace the last layer with 8 parallel layers.
+
+        @Param model: The input model
+        @Param num_classes: the classes of original images
+        @Param aug_classes: the extra classes of augmented images
+        """
+
+        super(Net1FC, self).__init__()
+        # 先去除最后一层fc层
+        self._conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3,
+                                bias=False)
+        self._res_layer = nn.Sequential(*list(model.children())[1:][:-1])
+        # 再定义四类的fc层
+        self._fc = nn.Linear(model.fc.in_features, all_classes)
+
+        self._softmax = nn.Softmax(dim=0)
+
+    def foward(self, x, label, stage='train'):
+        """
+        @Param x: the input image
+        @Param label: the label of the origin input image
+        @Param stage: train or test
+        @Param concate: bool symbool. concate the 8 output or not.
+
+        @Return: the output probability
+        """
+
+        if stage == "train":
+            output_x = self._res_layer(x)
+            output_x = self._fc(output_x)
+            output_x = self._softmax(output_x)
+        elif stage == "test":
+            # 测试时，输出通过所有分类器
+            output_x = self._res_layer(x)
+            output_x = self._fc(output_x)
+
+            output_x = self._softmax(output_x)  # 对每一行做softmax
+
+        return output_x
+
+
+class Net8FC(nn.Module):
+
     def __init__(self, model, num_classes, aug_classes):
         """
         @Description: this is to modify the input model by replace the last layer with 8 parallel layers.
@@ -22,7 +68,7 @@ class Net(nn.Module):
         @Param aug_classes: the extra classes of augmented images
         """
 
-        super(Net, self).__init__()
+        super(Net8FC, self).__init__()
         # 先去除最后一层fc层
         self.resnet_layer = nn.Sequential(*list(model.children())[:-1])
         # 再定义四类的fc层
@@ -84,6 +130,8 @@ class Net(nn.Module):
         return output_x
 
 
-copy_resnet18 = deepcopy(resnet18(True))
-my_resnet18 = Net(model=copy_resnet18, num_classes=8, aug_classes=4)
-print(my_resnet18)
+if __name__ == "__main__":
+    copy_resnet18 = deepcopy(resnet18(True))
+    # my_resnet18 = Net8FC(model=copy_resnet18, num_classes=8, aug_classes=4)
+    my_resnet18 = Net1FC(model=copy_resnet18, all_classes=32)
+    print(my_resnet18)
