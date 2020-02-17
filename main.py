@@ -14,8 +14,10 @@ from torch.optim import SGD, lr_scheduler
 from torchvision.models import resnet18
 from copy import deepcopy
 from tqdm import tqdm
+
 from data_loader.data_loader import train_dataloader, test_dataloader
 from model.model import Net1FC
+from model.metric import *
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -23,6 +25,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 def main():
     # 定义变量
     all_classes = 32
+    EPOCHS = 1
 
     copy_resnet18 = deepcopy(resnet18(pretrained=True))
     model = Net1FC(copy_resnet18, all_classes).cuda()
@@ -39,19 +42,23 @@ def main():
     pred_list = []
     tgt_list = []
 
-    for batch_idx, (data, tgt) in tqdm(enumerate(train_dataloader)):
-        tgt_list.extend(tgt)
+    for epoch in range(1, EPOCHS+1):
+        for batch_idx, (data, tgt) in tqdm(enumerate(train_dataloader)):
+            tgt_list.extend(tgt)
 
-        data, tgt = data.cuda(), tgt.cuda()
+            data, tgt = data.cuda(), tgt.cuda()
 
-        opt.zero_grad()
-        output = model(data)
-        pred_list.extend(torch.argmax(output, dim=0).tolist())
+            opt.zero_grad()
+            output = model(data)
+            pred_list.extend(torch.argmax(output, dim=0).tolist())
 
-        loss = criterion(output, tgt)
-        total_loss += loss.item()
-        loss.backward()
+            loss = criterion(output, tgt)
+            total_loss += loss.item()
+            loss.backward()
 
-        opt.step()
+            opt.step()
 
-    
+        # 每几个epoch结束，进行测试调节优化，
+        if epoch % 5 == 0:
+
+        scheduler.step()

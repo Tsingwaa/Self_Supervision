@@ -7,7 +7,6 @@
 """
 
 import torch
-import numpy as np
 
 
 def cal_acc(output, target):
@@ -20,17 +19,23 @@ def cal_acc(output, target):
 
 
 def conf_matrix(pred, target):
+    import numpy as np
+
     pred = pred.tolist()
     target = target.tolist()
     diff_cls = len(set(target))
     conf_mat = np.zeros((diff_cls, diff_cls)
+
     for idx, pred_lb in enumerate(pred):
-        tgt_lb=target[idx]
+        tgt_lb = target[idx]
+
         conf_mat[pred_lb][tgt_lb] += 1
 
     return conf_mat
 
 def cal_mean_recall(conf_mat):
+    import numpy as np
+
     class_correct_nums=np.diag(conf_mat)
     class_all_nums=np.sum(conf_mat, axis=1).transpose()
     class_recall=np.around(class_correct_nums / class_all_nums, decimals=2)
