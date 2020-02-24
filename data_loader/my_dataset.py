@@ -21,14 +21,14 @@ class MnistDataset(Dataset):
         self._transforms = transforms
         self._stage = stage
 
-        self._tr_images = np.load(glob(data_dir + r"*_train_images.npy"))
-        self._tr_labels = np.load(glob(data_dir + r"*_train_labels.npy"))
+        self._tr_images = np.load(glob(data_dir + r"*_train_images.npy")[0])
+        self._tr_labels = np.load(glob(data_dir + r"*_train_labels.npy")[0])
 
-        self._val_images = np.load(glob(data_dir + r"*_valid_labels.npy"))
-        self._val_labels = np.load(glob(data_dir + r"*_valid_labels.npy"))
+        self._val_images = np.load(glob(data_dir + r"*_valid_labels.npy")[0])
+        self._val_labels = np.load(glob(data_dir + r"*_valid_labels.npy")[0])
 
-        self._ts_images = np.load(glob(data_dir + r"*_test_images.npy"))
-        self._ts_labels = np.load(glob(data_dir + r"*_test_labels.npy"))
+        self._ts_images = np.load(glob(data_dir + r"*_test_images.npy")[0])
+        self._ts_labels = np.load(glob(data_dir + r"*_test_labels.npy")[0])
 
         self._images = {
             "train": self._tr_images,

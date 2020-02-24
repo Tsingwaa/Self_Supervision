@@ -7,15 +7,15 @@
 """
 
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms as T
+from torchvision import transforms as t
+
 from data_loader.my_dataset import MnistDataset
 
-
-trfms = T.Compose([
-    T.ToTensor(),
-    T.Normalize((0.1307,), (0.3081,)),
+trfms = t.Compose([
+    t.ToTensor(),
+    t.Normalize((0.1307,), (0.3081,)),
 ])
-root = './data'
+root = './data/'
 # 创建 dataset
 train_dataset = MnistDataset(root, transforms=trfms, stage='train')
 test_dataset = MnistDataset(root, transforms=trfms, stage='test')
