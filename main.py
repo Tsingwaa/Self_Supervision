@@ -15,7 +15,7 @@ from torchvision.models import resnet18
 from copy import deepcopy
 from tqdm import tqdm
 
-from data_loader.data_loader import train_dataloader, test_dataloader
+from data_loader.my_dataloader import train_dataloader, test_dataloader
 from model.model import Net1FC
 from model.metric import *
 
