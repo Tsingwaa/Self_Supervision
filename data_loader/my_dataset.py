@@ -15,20 +15,20 @@ from torchvision import transforms as t
 
 
 class MnistDataset(Dataset):
-    def __init__(self, data_dir, transforms=None, stage="train"):
+    def __init__(self, data_root, transforms=None, stage="train"):
         # stuff
-        self._root = data_dir
+        self._root = data_root
         self._transforms = transforms
         self._stage = stage
 
-        self._tr_images = np.load(glob(data_dir + r"*_train_images.npy")[0])
-        self._tr_labels = np.load(glob(data_dir + r"*_train_labels.npy")[0])
+        self._tr_images = np.load(glob(data_root + r"*_train_images.npy")[0])
+        self._tr_labels = np.load(glob(data_root + r"*_train_labels.npy")[0])
 
-        self._val_images = np.load(glob(data_dir + r"*_valid_labels.npy")[0])
-        self._val_labels = np.load(glob(data_dir + r"*_valid_labels.npy")[0])
+        self._val_images = np.load(glob(data_root + r"*_valid_images.npy")[0])
+        self._val_labels = np.load(glob(data_root + r"*_valid_labels.npy")[0])
 
-        self._ts_images = np.load(glob(data_dir + r"*_test_images.npy")[0])
-        self._ts_labels = np.load(glob(data_dir + r"*_test_labels.npy")[0])
+        self._ts_images = np.load(glob(data_root + r"*_test_images.npy")[0])
+        self._ts_labels = np.load(glob(data_root + r"*_test_labels.npy")[0])
 
         self._images = {
             "train": self._tr_images,
@@ -107,7 +107,8 @@ if __name__ == "__main__":
         t.ToTensor(),
         t.Normalize((0.1307,), (0.3081,)),
     ])
-    root = './data'
+    root = r'.\data\\'
     # 创建 dataset
     train_dataset = MnistDataset(root, transforms=transfms, stage='train')
+    valid_dataset = MnistDataset(root, transforms=transfms, stage='valid')
     test_dataset = MnistDataset(root, transforms=transfms, stage='test')
