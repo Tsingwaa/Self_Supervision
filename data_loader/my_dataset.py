@@ -31,26 +31,24 @@ class MnistDataset(Dataset):
         self._ts_images = np.load(glob(data_dir + r"*_test_images.npy"))
         self._ts_labels = np.load(glob(data_dir + r"*_test_labels.npy"))
 
-    def __getitem__(self, index):
-        out_image = []
-        out_label = []
-
-        # 所有数据集（训练、验证、测试）都是原图加上其增强的图片，再输出
-        images = {
+        self._images = {
             "train": self._tr_images,
             "valid": self._val_images,
             "test": self._ts_images
         }
-        labels = {
+        self._labels = {
             "train": self._tr_labels,
             "valid": self._val_labels,
             "test": self._ts_labels
         }
 
+    def __getitem__(self, index):
+        # 所有数据集（训练、验证、测试）都是原图加上其增强的图片，再输出
+
         rot_images = []
 
-        ori_image = images[self._stage][index]
-        ori_label = labels[self._stage][index]
+        ori_image = self._images[self._stage][index]
+        ori_label = self._labels[self._stage][index]
 
         if self._transforms is not None:
             ori_image = self._transforms(ori_image)
@@ -101,7 +99,7 @@ class MnistDataset(Dataset):
         return rot_images, ori_label, rot_labels
 
     def __len__(self):
-        return len(self._tr_labels)
+        return len(self._labels)
 
 
 if __name__ == "__main__":
