@@ -47,7 +47,7 @@ class MnistDataset(Dataset):
             "test": self._ts_labels
         }
 
-        out_images = []
+        rot_images = []
 
         ori_image = images[self._stage][index]
         ori_label = labels[self._stage][index]
@@ -55,7 +55,7 @@ class MnistDataset(Dataset):
         if self._transforms is not None:
             ori_image = self._transforms(ori_image)
 
-        out_images.append(ori_image)
+        rot_images.append(ori_image)
 
         for rot_times in [1, 2, 3]:
             rot_img = np.rot90(ori_image, k=rot_times)
@@ -63,9 +63,11 @@ class MnistDataset(Dataset):
             if self._transforms is not None:
                 rot_img = self._transforms(rot_img)
 
-            out_images.append(rot_img)
+            rot_images.append(rot_img)
 
         rot_labels = [0, 1, 2, 3]
+
+        rot_images = torch.stack(rot_images)  # 将四个图片的张量拼接
 
         # if self._stage == 'train':
         #     out_image = self._tr_images[index]
@@ -96,11 +98,10 @@ class MnistDataset(Dataset):
         #         # out_label.append(self._labels[index] * 4 + rot_times)
 
         # 如果 transform 不为 None，则进行 transform 操作
-        return out_images, ori_label, rot_labels
+        return rot_images, ori_label, rot_labels
 
-
-def __len__(self):
-    return len(self._tr_labels)
+    def __len__(self):
+        return len(self._tr_labels)
 
 
 if __name__ == "__main__":
