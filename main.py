@@ -7,27 +7,31 @@
 """
 
 import os
-import torch
+from copy import deepcopy
+
 from torch.nn import CrossEntropyLoss
 from torch.optim import SGD, lr_scheduler
 from torchvision.models import resnet18
-from copy import deepcopy
 from tqdm import tqdm
 
-from data_loader.my_dataloader import train_dataloader, test_dataloader
-from model.model import Net1FC
+from data_loader.my_dataloader import train_dataloader
 from model.metric import *
+from model.model import Net8FC
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_kVISIBLE_DEVICES"] = "0"
 
 
 def main():
     # 定义变量
-    all_classes = 32
+    # all_classes = 32
+    aug_classes = 5
+    num_classes = 8
+
     epochs = 1
 
     copy_resnet18 = deepcopy(resnet18(pretrained=True))
-    model = Net1FC(copy_resnet18, all_classes).cuda()
+    # model = Net1FC(copy_resnet18, all_classes).cuda()
+    model = Net8FC(copy_resnet18, num_classes, aug_classes).cuda()
 
     # 初始化损失函数
     criterion0 = CrossEntropyLoss()
@@ -61,7 +65,7 @@ def main():
             # 收集目的标签序列
             target_list.extend(target)
 
-            data,  target = data.cuda(), target.cuda()
+            data, target = data.cuda(), target.cuda()
 
             opt.zero_grad()
             output = model(data)
@@ -70,8 +74,9 @@ def main():
 
             # 对待通过的通道进行评判
             loss = criterion_list[label](output, target)
-            for i in range(8):
-                if i != label:
+            for idx in range(8):
+                if idx != label:
+                    for j in enumerate(target):
                     loss += criterion_list[i](output, pesdo_target)
 
             total_loss += loss.item()

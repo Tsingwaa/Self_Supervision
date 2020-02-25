@@ -7,6 +7,7 @@
 """
 
 from glob import glob
+from random import randint
 
 import numpy as np
 import torch
@@ -47,24 +48,27 @@ class MnistDataset(Dataset):
         rot_images = []
 
         ori_image = self._images[self._stage][index]
-        ori_label = self._labels[self._stage][index]
+        label = self._labels[self._stage][index]
 
-        if self._transforms is not None:
-            ori_image = self._transforms(ori_image)
+        rot_label = randint(0, 3)
+        rot_image = np.rot90(ori_image, k=rot_label)
 
-        rot_images.append(ori_image)
-
-        for rot_times in [1, 2, 3]:
-            rot_img = np.rot90(ori_image, k=rot_times)
-
-            if self._transforms is not None:
-                rot_img = self._transforms(rot_img)
-
-            rot_images.append(rot_img)
-
-        rot_labels = [0, 1, 2, 3]
-
-        rot_images = torch.stack(rot_images)  # 将四个图片的张量拼接
+        # if self._transforms is not None:
+        #     ori_image = self._transforms(ori_image)
+        #
+        # rot_images.append(ori_image)
+        #
+        # for rot_times in [1, 2, 3]:
+        #     rot_img = np.rot90(ori_image, k=rot_times)
+        #
+        #     if self._transforms is not None:
+        #         rot_img = self._transforms(rot_img)
+        #
+        #     rot_images.append(rot_img)
+        #
+        # rot_labels = [0, 1, 2, 3]
+        #
+        # rot_images = torch.stack(rot_images)  # 将四个图片的张量拼接
 
         # if self._stage == 'train':
         #     out_image = self._tr_images[index]
@@ -95,7 +99,8 @@ class MnistDataset(Dataset):
         #         # out_label.append(self._labels[index] * 4 + rot_times)
 
         # 如果 transform 不为 None，则进行 transform 操作
-        return rot_images, ori_label, rot_labels
+
+        return rot_image, label, rot_label
 
     def __len__(self):
         return len(self._labels)
