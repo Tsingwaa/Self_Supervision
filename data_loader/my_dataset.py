@@ -45,13 +45,16 @@ class MnistDataset(Dataset):
     def __getitem__(self, index):
         # 所有数据集（训练、验证、测试）都是原图加上其增强的图片，再输出
 
-        rot_images = []
+        # rot_images = []
 
         ori_image = self._images[self._stage][index]
         label = self._labels[self._stage][index]
 
         rot_label = randint(0, 3)
-        rot_image = np.rot90(ori_image, k=rot_label)
+        if rot_label == 0:
+            rot_image = ori_image
+        else:
+            rot_image = np.rot90(ori_image, k=rot_label)
 
         # if self._transforms is not None:
         #     ori_image = self._transforms(ori_image)

@@ -66,6 +66,15 @@ def main():
             target_list.extend(target)
 
             data, target = data.cuda(), target.cuda()
+            target0 = target1 = target2 = target3 = target4 = target5 = target6 = target7 = target
+            target_batch_dict = {
+                0: target0, 1: target1, 2: target2, 3: target3,
+                4: target4, 5: target5, 6: target6, 7: target7
+            }
+            for i in range(8):
+                for j, target_elem in enumerate(target):
+                    if target_elem != i:
+                        target_batch_dict[i][j] = 4  # 设置为其他未知类
 
             opt.zero_grad()
             output = model(data)
@@ -73,15 +82,13 @@ def main():
             pred_list.extend(torch.argmax(output, dim=0).tolist())
 
             # 对待通过的通道进行评判
-            loss = criterion_list[label](output, target)
+            loss = criterion_list[label](output[0], target_batch_dict[0])
             for idx in range(8):
-                if idx != label:
-                    for j in enumerate(target):
-                    loss += criterion_list[i](output, pesdo_target)
+                loss += criterion_list[idx](output[idx], target_batch_dict[idx])
 
             total_loss += loss.item()
 
-            my_metric2()
+            # my_metric2()
 
             loss.backward()
 
