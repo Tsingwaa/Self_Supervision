@@ -129,7 +129,8 @@ class Net8FC(nn.Module):
                     output_x1, output_x2, output_x3, output_x4,
                     output_x5, output_x6, output_x7, output_x8
                 ], 1)  # 纵向拼接为一个矩阵，每一行为一个通道输出
-                output_x = self._softmax(output_x)  # 对每一行做softmax
+                # Crossentropy前面无需加softmax层
+                # output_x = self._softmax(output_x)  # 对每一行做softmax
                 # 此时输出为二维概率矩阵
 
         return output_x

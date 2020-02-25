@@ -2,7 +2,7 @@ import importlib
 from utils import Timer
 
 
-class TensorboardWriter():
+class TensorboardWriter:
     def __init__(self, log_dir, logger, enabled):
         self.writer = None
         self.selected_module = ""

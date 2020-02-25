@@ -102,13 +102,14 @@ class MnistDataset(Dataset):
 
 
 if __name__ == "__main__":
-    # 定义我们的 transforms (1)
-    transfms = t.Compose([
-        t.ToTensor(),
-        t.Normalize((0.1307,), (0.3081,)),
-    ])
-    root = r'.\data\\'
-    # 创建 dataset
-    train_dataset = MnistDataset(root, transforms=transfms, stage='train')
-    valid_dataset = MnistDataset(root, transforms=transfms, stage='valid')
-    test_dataset = MnistDataset(root, transforms=transfms, stage='test')
+    pass
+    # # 定义我们的 transforms (1)
+    # transfms = t.Compose([
+    #     t.ToTensor(),
+    #     t.Normalize((0.1307,), (0.3081,)),
+    # ])
+    # root = r'..\data\\'
+    # # 创建 dataset
+    # train_dataset = MnistDataset(root, transforms=transfms, stage='train')
+    # valid_dataset = MnistDataset(root, transforms=transfms, stage='valid')
+    # test_dataset = MnistDataset(root, transforms=transfms, stage='test')
