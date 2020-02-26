@@ -16,7 +16,7 @@ transfms = t.Compose([
     t.Normalize((0.1307,), (0.3081,)),
 ])
 
-root = r'..\data\\'
+root = r'.\data\\'
 # 创建 dataset
 train_dataset = MnistDataset(root, transforms=transfms, stage='train')
 valid_dataset = MnistDataset(root, transforms=transfms, stage='valid')

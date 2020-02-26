@@ -80,7 +80,7 @@ def main():
             output = model(data)
             # 收集预测标签序列，与目的标签一起进行评估
             pred_list.extend(torch.argmax(output, dim=0).tolist())
-
+            print('111')
             # 对待通过的通道进行评判
             loss = criterion_list[label](output[0], target_batch_dict[0])
             for idx in range(8):
@@ -99,3 +99,7 @@ def main():
             pass
 
         scheduler.step(epoch)
+
+
+if __name__ == '__main__':
+    main()

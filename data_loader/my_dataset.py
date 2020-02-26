@@ -34,12 +34,12 @@ class MnistDataset(Dataset):
         self._images = {
             "train": self._tr_images,
             "valid": self._val_images,
-            "test": self._ts_images
+            "test": self._ts_images,
         }
         self._labels = {
             "train": self._tr_labels,
             "valid": self._val_labels,
-            "test": self._ts_labels
+            "test": self._ts_labels,
         }
 
     def __getitem__(self, index):
@@ -52,9 +52,19 @@ class MnistDataset(Dataset):
 
         rot_label = randint(0, 3)
         if rot_label == 0:
-            rot_image = ori_image
+            rot_image = np.ascontiguousarray(ori_image)
         else:
-            rot_image = np.rot90(ori_image, k=rot_label)
+            rot_image = np.ascontiguousarray(np.rot90(ori_image, k=rot_label))
+
+        # np.set_printoptions(linewidth=20000)
+        # print(rot_image)
+
+        if self._transforms is not None:
+            rot_image = self._transforms(rot_image)
+            # rot_image = t.ToTensor()(rot_image)
+            # print(rot_image)
+
+        torch.set_printoptions(precision=1, linewidth=400)
 
         # if self._transforms is not None:
         #     ori_image = self._transforms(ori_image)
@@ -110,14 +120,16 @@ class MnistDataset(Dataset):
 
 
 if __name__ == "__main__":
-    pass
-    # # 定义我们的 transforms (1)
-    # transfms = t.Compose([
-    #     t.ToTensor(),
-    #     t.Normalize((0.1307,), (0.3081,)),
-    # ])
-    # root = r'..\data\\'
-    # # 创建 dataset
-    # train_dataset = MnistDataset(root, transforms=transfms, stage='train')
-    # valid_dataset = MnistDataset(root, transforms=transfms, stage='valid')
-    # test_dataset = MnistDataset(root, transforms=transfms, stage='test')
+    # pass
+    # 定义我们的 transforms (1)
+    transfms = t.Compose([
+        t.ToTensor(),
+        # t.Normalize((0.1307,), (0.3081,)),
+    ])
+    root = r'..\data\\'
+    # 创建 dataset
+    train_dataset = MnistDataset(root, transforms=transfms, stage='train')
+    valid_dataset = MnistDataset(root, transforms=transfms, stage='valid')
+    test_dataset = MnistDataset(root, transforms=transfms, stage='test')
+
+    print(train_dataset[0][0])
