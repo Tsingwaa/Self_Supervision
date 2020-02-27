@@ -58,7 +58,7 @@ def main():
     target_list = []
 
     # 作为其余7个多余的损坏函数的拟合目标
-    pesdo_target = torch.tensor([0.01 for i in range(4)]).cuda()
+    # pesdo_target = torch.tensor([0.01 for i in range(4)]).cuda()
 
     for epoch in range(1, epochs + 1):
         for batch_idx, (data, label, target) in tqdm(enumerate(train_dataloader)):
@@ -74,13 +74,13 @@ def main():
             for i in range(8):
                 for j, target_elem in enumerate(target):
                     if target_elem != i:
-                        target_batch_dict[i][j] = 4  # 设置为其他未知类
+                        target_batch_dict[i][j] = 4  # 设置为其他未知类rot_label=4
 
             opt.zero_grad()
             output = model(data)
             # 收集预测标签序列，与目的标签一起进行评估
             pred_list.extend(torch.argmax(output, dim=0).tolist())
-            print('111')
+
             # 对待通过的通道进行评判
             loss = criterion_list[label](output[0], target_batch_dict[0])
             for idx in range(8):

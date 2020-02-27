@@ -7,6 +7,7 @@
 """
 import json
 
+import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms as t
 
@@ -30,12 +31,14 @@ train_dataset = MnistDataset(root, transforms=transfms, stage='train')
 valid_dataset = MnistDataset(root, transforms=transfms, stage='valid')
 test_dataset = MnistDataset(root, transforms=transfms, stage='test')
 
-train_dataloader = DataLoader(train_dataset, num_workers=0, batch_size=16)
-valid_dataloader = DataLoader(valid_dataset, num_workers=0, batch_size=16)
-test_dataloader = DataLoader(test_dataset, num_workers=0, batch_size=16)
-
 # print(train_dataset[0])
-# for index, label, rot_labels in enumerate(train_dataloader):
-#     print(label.shape, rot_labels.shape)
-#     if index == 1:
-#         break
+
+
+train_dataloader = DataLoader(train_dataset, num_workers=0, batch_size=5, shuffle=True)
+valid_dataloader = DataLoader(valid_dataset, num_workers=0, batch_size=5)
+test_dataloader = DataLoader(test_dataset, num_workers=0, batch_size=5)
+
+for index, (data, label, rot_labels) in enumerate(train_dataloader):
+    print(data.shape, label, rot_labels)
+    if index == 1:
+        break
