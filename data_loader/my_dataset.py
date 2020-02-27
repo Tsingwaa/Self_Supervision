@@ -64,7 +64,7 @@ class MnistDataset(Dataset):
             # rot_image = t.ToTensor()(rot_image)
             # print(rot_image)
 
-        torch.set_printoptions(precision=1, linewidth=400)
+        torch.set_printoptions(precision=2, linewidth=1000)
 
         # if self._transforms is not None:
         #     ori_image = self._transforms(ori_image)
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     # 定义我们的 transforms (1)
     transfms = t.Compose([
         t.ToTensor(),
-        # t.Normalize((0.1307,), (0.3081,)),
+        t.Normalize((0.1307,), (0.3081,)),
     ])
     root = r'..\data\\'
     # 创建 dataset
