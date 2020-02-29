@@ -79,7 +79,7 @@ def main():
             for i in range(8):
                 for j, target_elem in enumerate(target):
                     if target_elem != i:
-                        target_batch_dict[i][j] = 4  # 设置为其他未知类rot_label=4
+                        target_batch_dict[i][j] = 4  # 设置为其他未知类rot_label=4, 給其他类设定目的标签
 
             print(target_batch_dict[0])
 
