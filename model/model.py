@@ -117,6 +117,7 @@ class Net8FC(nn.Module):
             output_x6 = self._fc6(output_x)
             output_x7 = self._fc7(output_x)
             output_x8 = self._fc8(output_x)
+
             if is_concate:
                 output_x = torch.cat([
                     output_x1, output_x2, output_x3, output_x4,
