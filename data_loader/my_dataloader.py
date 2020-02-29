@@ -7,38 +7,44 @@
 """
 import json
 
-import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms as t
 
 from data_loader.my_dataset import MnistDataset
 
-mean_std_path = r'../data/mean_std.json'
-with open(mean_std_path, 'r') as file:
-    mean_std_dict = json.load(file)
-mean = mean_std_dict['mean']
-std = mean_std_dict['std']
-# print(mean, std)
 
-transfms = t.Compose([
-    t.ToTensor(),
-    t.Normalize((mean,), (std,)),
-])
+def get_dataloader(_mean_std_path, _data_root):
+    with open(_mean_std_path, 'r') as file:
+        mean_std_dict = json.load(file)
+    mean = mean_std_dict['mean']
+    std = mean_std_dict['std']
+    # print(mean, std)
 
-root = r'../data/'
-# 创建 dataset
-train_dataset = MnistDataset(root, transforms=transfms, stage='train')
-valid_dataset = MnistDataset(root, transforms=transfms, stage='valid')
-test_dataset = MnistDataset(root, transforms=transfms, stage='test')
+    transfms = t.Compose([
+        t.ToTensor(),
+        t.Normalize((mean,), (std,)),
+    ])
 
-# print(train_dataset[0])
+    # 创建 dataset
+    train_dataset = MnistDataset(_data_root, transforms=transfms, stage='train')
+    valid_dataset = MnistDataset(_data_root, transforms=transfms, stage='valid')
+    test_dataset = MnistDataset(_data_root, transforms=transfms, stage='test')
+
+    # print(train_dataset[0])
+
+    train_dataloader = DataLoader(train_dataset, num_workers=0, batch_size=5, shuffle=True)
+    valid_dataloader = DataLoader(valid_dataset, num_workers=0, batch_size=5)
+    test_dataloader = DataLoader(test_dataset, num_workers=0, batch_size=5)
+
+    return {'train': train_dataloader, 'valid': valid_dataloader, 'test': test_dataloader}
 
 
-train_dataloader = DataLoader(train_dataset, num_workers=0, batch_size=5, shuffle=True)
-valid_dataloader = DataLoader(valid_dataset, num_workers=0, batch_size=5)
-test_dataloader = DataLoader(test_dataset, num_workers=0, batch_size=5)
+if __name__ == '__main__':
+    mean_std_path = '../data/mean_std.json'
+    data_root = '../data/'
+    dataloader = get_dataloader(mean_std_path, data_root)
 
-for index, (data, label, rot_labels) in enumerate(train_dataloader):
-    print(data.shape, label, rot_labels)
-    if index == 1:
-        break
+    for index, (data, label, rot_labels) in enumerate(dataloader['train']):
+        print(data.shape, label, rot_labels)
+        if index == 2:
+            break

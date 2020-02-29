@@ -14,7 +14,7 @@ from torch.optim import SGD, lr_scheduler
 from torchvision.models import resnet18
 from tqdm import tqdm
 
-from data_loader.my_dataloader import train_dataloader
+from data_loader.my_dataloader import get_dataloader
 from model.metric import *
 from model.model import Net8FC
 
@@ -28,6 +28,11 @@ def main():
     num_classes = 8
 
     epochs = 1
+
+    # get dataloader
+    mean_std_path = './data/mean_std.json'
+    data_root = './data/'
+    loader = get_dataloader(mean_std_path, data_root)
 
     copy_resnet18 = deepcopy(resnet18(pretrained=True))
     # model = Net1FC(copy_resnet18, all_classes).cuda()
@@ -61,7 +66,7 @@ def main():
     # pesdo_target = torch.tensor([0.01 for i in range(4)]).cuda()
 
     for epoch in range(1, epochs + 1):
-        for batch_idx, (data, label, target) in tqdm(enumerate(train_dataloader)):
+        for batch_idx, (data, label, target) in tqdm(enumerate(loader['train'])):
             # 收集目的标签序列
             target_list.extend(target)
 
@@ -76,14 +81,16 @@ def main():
                     if target_elem != i:
                         target_batch_dict[i][j] = 4  # 设置为其他未知类rot_label=4
 
+            print(target_batch_dict[0])
+
             opt.zero_grad()
             output = model(data)
             # 收集预测标签序列，与目的标签一起进行评估
             pred_list.extend(torch.argmax(output, dim=0).tolist())
 
             # 对待通过的通道进行评判
-            loss = criterion_list[label](output[0], target_batch_dict[0])
-            for idx in range(8):
+            loss = criterion_list[0](output[0], target_batch_dict[0])
+            for idx in range(start=1, stop=8):
                 loss += criterion_list[idx](output[idx], target_batch_dict[idx])
 
             total_loss += loss.item()
