@@ -88,7 +88,7 @@ def main():
             # 收集预测标签序列，与目的标签一起进行评估
             pred_list.extend(torch.argmax(output, dim=0).tolist())
 
-            # 对待通过的通道进行评判
+            # 对8个分类器的输出，求损失函数
             loss = criterion_list[0](output[0], target_batch_dict[0])
             for idx in range(start=1, stop=8):
                 loss += criterion_list[idx](output[idx], target_batch_dict[idx])
