@@ -76,6 +76,7 @@ class Net8FC(nn.Module):
         self._res_layer = nn.Sequential(*list(model.children())[1:][:-1])
 
         # 再定义四类的fc层
+        self._fc0 = nn.Linear(model.fc.in_features, self._aug_classes)
         self._fc1 = nn.Linear(model.fc.in_features, self._aug_classes)
         self._fc2 = nn.Linear(model.fc.in_features, self._aug_classes)
         self._fc3 = nn.Linear(model.fc.in_features, self._aug_classes)
@@ -83,7 +84,6 @@ class Net8FC(nn.Module):
         self._fc5 = nn.Linear(model.fc.in_features, self._aug_classes)
         self._fc6 = nn.Linear(model.fc.in_features, self._aug_classes)
         self._fc7 = nn.Linear(model.fc.in_features, self._aug_classes)
-        self._fc8 = nn.Linear(model.fc.in_features, self._aug_classes)
         self._softmax = nn.Softmax(dim=0)
 
     def foward(self, x, label, stage, is_concate=False):
@@ -99,8 +99,8 @@ class Net8FC(nn.Module):
         """
 
         fc_dict = {
-            1: self._fc1, 2: self._fc2, 3: self._fc3, 4: self._fc4,
-            5: self._fc5, 6: self._fc6, 7: self._fc7, 8: self._fc8
+            0: self._fc0, 1: self._fc1, 2: self._fc2, 3: self._fc3,
+            4: self._fc4, 5: self._fc5, 6: self._fc6, 7: self._fc7
         }
         output_x = self._res_layer(x)
         if stage == "train":
@@ -109,6 +109,7 @@ class Net8FC(nn.Module):
 
         elif stage == "test":
             # 测试时，输出通过所有分类器
+            output_x0 = self._fc0(output_x)
             output_x1 = self._fc1(output_x)
             output_x2 = self._fc2(output_x)
             output_x3 = self._fc3(output_x)
@@ -116,19 +117,18 @@ class Net8FC(nn.Module):
             output_x5 = self._fc5(output_x)
             output_x6 = self._fc6(output_x)
             output_x7 = self._fc7(output_x)
-            output_x8 = self._fc8(output_x)
 
             if is_concate:
                 output_x = torch.cat([
-                    output_x1, output_x2, output_x3, output_x4,
-                    output_x5, output_x6, output_x7, output_x8
+                    output_x0, output_x1, output_x2, output_x3,
+                    output_x4, output_x5, output_x6, output_x7
                 ], 0)  # 横向拼接为一行
                 output_x = self._softmax(output_x)
                 # 此时输出为一行概率
             else:
                 output_x = torch.cat([
-                    output_x1, output_x2, output_x3, output_x4,
-                    output_x5, output_x6, output_x7, output_x8
+                    output_x0, output_x1, output_x2, output_x3,
+                    output_x4, output_x5, output_x6, output_x7
                 ], 1)  # 纵向拼接为一个矩阵，每一行为一个通道输出
                 # Crossentropy前面无需加softmax层
                 # output_x = self._softmax(output_x)  # 对每一行做softmax

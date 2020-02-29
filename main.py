@@ -27,7 +27,7 @@ def main():
     aug_classes = 5
     num_classes = 8
 
-    epochs = 1
+    epochs = 3
 
     # get dataloader
     mean_std_path = './data/mean_std.json'
@@ -67,7 +67,7 @@ def main():
 
     for epoch in range(1, epochs + 1):
         for batch_idx, (data, label, target) in tqdm(enumerate(loader['train'])):
-            # 收集目的标签序列
+            # 收集rot_label序列
             target_list.extend(target)
 
             data, target = data.cuda(), target.cuda()
@@ -75,6 +75,7 @@ def main():
             target_batch_dict = {
                 0: target0, 1: target1, 2: target2, 3: target3,
                 4: target4, 5: target5, 6: target6, 7: target7
+
             }
             for i in range(8):
                 for j, target_elem in enumerate(target):
@@ -84,7 +85,7 @@ def main():
             print(target_batch_dict[0])
 
             opt.zero_grad()
-            output = model(data)
+            output = model(data, label, "train")
             # 收集预测标签序列，与目的标签一起进行评估
             pred_list.extend(torch.argmax(output, dim=0).tolist())
 
