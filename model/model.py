@@ -75,7 +75,7 @@ class Net8FC(nn.Module):
         self._conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self._res_layer = nn.Sequential(*list(model.children())[1:][:-1])
 
-        # 再定义四类的fc层
+        # 再定义八类的fc层
         self._fc0 = nn.Linear(model.fc.in_features, self._aug_classes)
         self._fc1 = nn.Linear(model.fc.in_features, self._aug_classes)
         self._fc2 = nn.Linear(model.fc.in_features, self._aug_classes)
@@ -84,9 +84,9 @@ class Net8FC(nn.Module):
         self._fc5 = nn.Linear(model.fc.in_features, self._aug_classes)
         self._fc6 = nn.Linear(model.fc.in_features, self._aug_classes)
         self._fc7 = nn.Linear(model.fc.in_features, self._aug_classes)
-        self._softmax = nn.Softmax(dim=0)
+        self._softmax = nn.Softmax(dim=1)
 
-    def foward(self, x, label, stage, is_concate=False):
+    def forward(self, x, label, stage, is_concate=False):
         """
         @Description:
 
@@ -102,44 +102,44 @@ class Net8FC(nn.Module):
             0: self._fc0, 1: self._fc1, 2: self._fc2, 3: self._fc3,
             4: self._fc4, 5: self._fc5, 6: self._fc6, 7: self._fc7
         }
-        output_x = self._res_layer(x)
-        if stage == "train":
-            output_x = fc_dict[label](output_x)
-            output_x = self._softmax(output_x)
+        x = self._conv1(x)
+        # print(x.shape)
+        x = self._res_layer(x).view(10, 512)
+        # print(x.shape)
 
-        elif stage == "test":
-            # 测试时，输出通过所有分类器
-            output_x0 = self._fc0(output_x)
-            output_x1 = self._fc1(output_x)
-            output_x2 = self._fc2(output_x)
-            output_x3 = self._fc3(output_x)
-            output_x4 = self._fc4(output_x)
-            output_x5 = self._fc5(output_x)
-            output_x6 = self._fc6(output_x)
-            output_x7 = self._fc7(output_x)
+        x0 = self._fc0(x)
+        x1 = self._fc1(x)
+        x2 = self._fc2(x)
+        x3 = self._fc3(x)
+        x4 = self._fc4(x)
+        x5 = self._fc5(x)
+        x6 = self._fc6(x)
+        x7 = self._fc7(x)
 
-            if is_concate:
-                output_x = torch.cat([
-                    output_x0, output_x1, output_x2, output_x3,
-                    output_x4, output_x5, output_x6, output_x7
-                ], 0)  # 横向拼接为一行
-                output_x = self._softmax(output_x)
-                # 此时输出为一行概率
-            else:
-                output_x = torch.cat([
-                    output_x0, output_x1, output_x2, output_x3,
-                    output_x4, output_x5, output_x6, output_x7
-                ], 1)  # 纵向拼接为一个矩阵，每一行为一个通道输出
-                # Crossentropy前面无需加softmax层
-                # output_x = self._softmax(output_x)  # 对每一行做softmax
-                # 此时输出为二维概率矩阵
+        if is_concate:
+            output = torch.cat([x0, x1, x2, x3, x4, x5, x6, x7], 1)  # 横向拼接为一行
+            output = self._softmax(output)
+            # 此时输出为一行概率
+        else:
+            x0 = self._softmax(x0)
+            x1 = self._softmax(x1)
+            x2 = self._softmax(x2)
+            x3 = self._softmax(x3)
+            x4 = self._softmax(x4)
+            x5 = self._softmax(x5)
+            x6 = self._softmax(x6)
+            x7 = self._softmax(x7)
+            # Crossentropy前面无需加softmax层
+            output = [x0, x1, x2, x3, x4, x5, x6, x7]
 
-        return output_x
+        # print(output)
+
+        return output
 
 
 if __name__ == "__main__":
     copy_resnet18 = deepcopy(resnet18(True))
     # my_resnet18 = Net8FC(model=copy_resnet18, num_classes=8, aug_classes=4)
     my_resnet18_1fc = Net1FC(model=copy_resnet18, all_classes=32)
-    my_resnet18_8fc = Net8FC(model=copy_resnet18, num_classes=8, aug_classes=4)
-    print(my_resnet18_1fc)
+    my_resnet18_8fc = Net8FC(model=copy_resnet18, num_classes=8, aug_classes=5)
+    print(my_resnet18_8fc)

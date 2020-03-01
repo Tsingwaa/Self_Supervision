@@ -72,27 +72,25 @@ def main():
 
             data, target = data.cuda(), target.cuda()
             target0 = target1 = target2 = target3 = target4 = target5 = target6 = target7 = target
-            target_batch_dict = {
-                0: target0, 1: target1, 2: target2, 3: target3,
-                4: target4, 5: target5, 6: target6, 7: target7
+            target_batch_list = [target0, target1, target2, target3, target4, target5, target6, target7]
 
-            }
             for i in range(8):
                 for j, target_elem in enumerate(target):
                     if target_elem != i:
-                        target_batch_dict[i][j] = 4  # 设置为其他未知类rot_label=4, 給其他类设定目的标签
+                        target_batch_list[i][j] = 4  # 其他分类器输出target修改输出，未知类rot_label=4
 
-            print(target_batch_dict[0])
+            # print(target_batch_dict[2])
 
             opt.zero_grad()
-            output = model(data, label, "train")
+            output = model(data, label, "train")  # 得到含有8个分类器输出的列表
             # 收集预测标签序列，与目的标签一起进行评估
-            pred_list.extend(torch.argmax(output, dim=0).tolist())
+            # pred_list.extend(torch.argmax(output, dim=0).tolist())
 
             # 对8个分类器的输出，求损失函数
-            loss = criterion_list[0](output[0], target_batch_dict[0])
-            for idx in range(start=1, stop=8):
-                loss += criterion_list[idx](output[idx], target_batch_dict[idx])
+            print(output[0].shape, target_batch_list[0].shape)
+            loss = criterion_list[0](output[0], target_batch_list[0])
+            for idx in range(1, 8):
+                loss += criterion_list[idx](output[idx], target_batch_list[idx])
 
             total_loss += loss.item()
 

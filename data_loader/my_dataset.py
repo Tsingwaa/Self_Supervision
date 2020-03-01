@@ -116,7 +116,7 @@ class MnistDataset(Dataset):
         return rot_image, label, rot_label
 
     def __len__(self):
-        return len(self._labels)
+        return len(self._labels[self._stage])
 
 
 if __name__ == "__main__":
