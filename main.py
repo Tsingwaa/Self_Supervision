@@ -70,18 +70,19 @@ def train():
             tgt_list.extend(tgt)
 
             data, tgt = data.cuda(), tgt.cuda()
-            print(label, tgt)
-            tgt_batch_list = [tgt for i in range(8)]
+            # print(label, tgt)
 
-            print(tgt_batch_list)
+            tgt_batch_list = []
             for i in range(8):
+                tgt_batch_list.append(tgt.clone())
+
                 for j, tgt_elem in enumerate(tgt):
                     if label[j] != i:
                         tgt_batch_list[i][j] = 4  # 其他分类器若输入非本类图片，则target修改为4，即非本类
 
-            print(tgt_batch_list)
-            if batch_idx <= 1:
-                break
+            # print(tgt_batch_list)
+            # if batch_idx <= 1:
+            #     break
             # print(target_batch_dict[2])
 
             opt.zero_grad()
