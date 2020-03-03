@@ -33,7 +33,7 @@ def get_dataloader(_mean_std_path, _data_root):
     # print(train_dataset[0])
 
     train_dataloader = DataLoader(train_dataset, num_workers=0, batch_size=10, shuffle=True)
-    valid_dataloader = DataLoader(valid_dataset, num_workers=0, batch_size=10)
+    valid_dataloader = DataLoader(valid_dataset, num_workers=0, batch_size=10, shuffle=True)
     test_dataloader = DataLoader(test_dataset, num_workers=0, batch_size=10)
 
     return {'train': train_dataloader, 'valid': valid_dataloader, 'test': test_dataloader}

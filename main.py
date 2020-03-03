@@ -51,8 +51,6 @@ def train():
     # criterion_list = [criterion0, criterion1, criterion2, criterion3, criterion4, criterion5, criterion6, criterion7]
     criterion_list = [CrossEntropyLoss() for i in range(8)]
 
-
-
     # 设置优化器
     opt = SGD(model.parameters(), lr=1e-2, momentum=0.9)
     scheduler = lr_scheduler.StepLR(opt, step_size=40, gamma=0.1)
@@ -64,21 +62,26 @@ def train():
 
     for epoch in range(1, epochs + 1):
         pred_list = []
-        target_list = []
+        tgt_list = []
         total_loss = 0.0
 
-        for batch_idx, (data, label, target) in tqdm(enumerate(loader['train'])):
+        for batch_idx, (data, label, tgt) in tqdm(enumerate(loader['train'])):
             # 收集rot_label序列
-            target_list.extend(target)
+            tgt_list.extend(tgt)
 
-            data, target = data.cuda(), target.cuda()
-            target_batch_list = [target for i in range(8)]
+            data, tgt = data.cuda(), tgt.cuda()
+            print(label, tgt)
+            tgt_batch_list = [tgt for i in range(8)]
 
+            print(tgt_batch_list)
             for i in range(8):
-                for j, target_elem in enumerate(target):
-                    if target_elem != i:
-                        target_batch_list[i][j] = 4  # 其他分类器输出target修改输出，未知类rot_label=4
+                for j, tgt_elem in enumerate(tgt):
+                    if label[j] != i:
+                        tgt_batch_list[i][j] = 4  # 其他分类器若输入非本类图片，则target修改为4，即非本类
 
+            print(tgt_batch_list)
+            if batch_idx <= 1:
+                break
             # print(target_batch_dict[2])
 
             opt.zero_grad()
@@ -86,11 +89,12 @@ def train():
             # 收集预测标签序列，与目的标签一起进行评估
             # pred_list.extend(torch.argmax(output, dim=0).tolist())
 
+            # print(output[0][0], tgt_batch_list[0][0])
             # 对8个分类器的输出，求损失函数
             # print
-            batch_loss = criterion_list[0](output[0], target_batch_list[0])
+            batch_loss = criterion_list[0](output[0], tgt_batch_list[0])
             for idx in range(1, 8):
-                batch_loss += criterion_list[idx](output[idx], target_batch_list[idx])
+                batch_loss += criterion_list[idx](output[idx], tgt_batch_list[idx])
 
             total_loss += batch_loss.item()
 
@@ -103,13 +107,14 @@ def train():
         print()
         # 每几个epoch结束，进行测试调节优化，
         if epoch % 5 == 0:
-            valid(model, valid())
+            valid(model, loader['valid'])
 
         scheduler.step(epoch)
 
 
 def valid(model, val_loader):
     for index, (data, label, rot_label) in enumerate(val_loader):
+        pass
 
 
 if __name__ == '__main__':
