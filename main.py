@@ -9,13 +9,13 @@
 import os
 from copy import deepcopy
 
+import numpy as np
 from torch.nn import CrossEntropyLoss
 from torch.optim import SGD, lr_scheduler
 from torchvision.models import resnet18
 from tqdm import tqdm
 
 from data_loader.my_dataloader import get_dataloader
-from model.metric import *
 from model.model import Net8FC
 
 os.environ["CUDA_kVISIBLE_DEVICES"] = "0"
@@ -62,12 +62,12 @@ def train():
 
     for epoch in range(1, epochs + 1):
         pred_list = []
-        tgt_list = []
+        label_list = []
         total_loss = 0.0
 
         for batch_idx, (data, label, tgt) in tqdm(enumerate(loader['train'])):
             # 收集rot_label序列
-            tgt_list.extend(tgt)
+            label_list.extend(tgt)
 
             data, tgt = data.cuda(), tgt.cuda()
             # print(label, tgt)
@@ -80,19 +80,18 @@ def train():
                     if label[j] != i:
                         tgt_batch_list[i][j] = 4  # 其他分类器若输入非本类图片，则target修改为4，即非本类
 
-            # print(tgt_batch_list)
-            # if batch_idx <= 1:
-            #     break
-            # print(target_batch_dict[2])
-
             opt.zero_grad()
             output = model(data, label, "train")  # 得到含有8个分类器输出的列表
             # 收集预测标签序列，与目的标签一起进行评估
             # pred_list.extend(torch.argmax(output, dim=0).tolist())
 
-            # print(output[0][0], tgt_batch_list[0][0])
-            # 对8个分类器的输出，求损失函数
-            # print
+            for k in range(batch_idx):  # 对每张图片的八个输出求8个loss，loss最小的分类器输出为该类
+                loss_k = []
+                for idx in range(8):
+                    loss_k.append(criterion_list[idx](output[idx][k], tgt_batch_list[idx][k]).item())
+
+                pred_list.append(np.argmin(loss_k))
+
             batch_loss = criterion_list[0](output[0], tgt_batch_list[0])
             for idx in range(1, 8):
                 batch_loss += criterion_list[idx](output[idx], tgt_batch_list[idx])
