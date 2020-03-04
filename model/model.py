@@ -106,7 +106,7 @@ class Net8FC(nn.Module):
         x = self._conv1(x)
         # print(x.shape)
         if stage == 'train':
-            x = self._res_layer(x).view(50, 512)
+            x = self._res_layer(x).view(100, 512)
         else:
             x = self._res_layer(x).view(4, 512)
         # print(x.shape)

@@ -29,7 +29,7 @@ def train():
     aug_classes = 5
     num_classes = 8
 
-    epochs = 1
+    epochs = 300
 
     torch.set_printoptions(precision=2, threshold=100000, linewidth=10000)
 
@@ -57,14 +57,14 @@ def train():
     criterion_list = [CrossEntropyLoss() for i in range(8)]
 
     # 设置优化器
-    opt = SGD(model.parameters(), lr=1e-3, momentum=0.9)
-    scheduler = lr_scheduler.StepLR(opt, step_size=40, gamma=0.1)
+    opt = SGD(model.parameters(), lr=1e-2, momentum=0.9)
+    scheduler = lr_scheduler.StepLR(opt, step_size=40, gamma=0.5)
 
     model.train()
     best_mean_recall = 0.0
     recent_recall_list = []
     for epoch in range(1, epochs + 1):
-        print('\n+++++++++++++++++++++++++++++++ [ EPOCH {} ] +++++++++++++++++++++++++++++++\n'.format(epoch))
+        print('\n++++++++++++++++++++++++++++++++++ [ EPOCH {} ] ++++++++++++++++++++++++++++++++++\n'.format(epoch))
         pred_list = []
         label_list = []
         total_loss = 0.0
@@ -119,7 +119,7 @@ def train():
         tr_cls_recall, tr_cls_precision = cal_recall_precision(conf_mat, True, [i for i in range(8)])
 
         # 每几个epoch结束，进行测试调节优化，
-        if epoch % 5 != 0:
+        if epoch % 10 == 0:
             valid(model, loader['valid'])
 
         recent_recall_list.append(np.mean(tr_cls_recall))
@@ -163,14 +163,36 @@ def valid(model, val_loader):
             pred_label = np.argmin(val_loss)
             val_pred_list.append(int(pred_label))
 
-        print(val_pred_list)
-        print(val_label_list)
+        # print(val_pred_list)
+        # print(val_label_list)
         val_conf_mat = conf_matrix(val_pred_list, val_label_list, 8, True, [i for i in range(8)])
         cal_recall_precision(val_conf_mat, True, [i for i in range(8)])
 
 
+def get_threshold():
+    aug_classes = 5
+    num_classes = 8
+
+    epochs = 300
+
+    torch.set_printoptions(precision=2, threshold=100000, linewidth=10000)
+
+    # get dataloader
+    mean_std_path = './data/mean_std.json'
+    data_root = './data/'
+    # loader dict:'train','valid', 'test'
+    loader = get_dataloader(mean_std_path, data_root)
+
+    copy_resnet18 = deepcopy(resnet18(pretrained=False))
+    # model = Net1FC(copy_resnet18, all_classes).cuda()
+    model = Net8FC(copy_resnet18, num_classes, aug_classes).cuda()
+
+    path = ''
+    ckt = torch.load(path)
+
+
 def test():
-    load_ckt = True
+    pass
 
 
 if __name__ == '__main__':
