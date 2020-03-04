@@ -7,6 +7,7 @@
 """
 import json
 
+import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms as t
 
@@ -32,7 +33,7 @@ def get_dataloader(_mean_std_path, _data_root):
 
     # print(train_dataset[0])
 
-    train_dataloader = DataLoader(train_dataset, num_workers=0, batch_size=10, shuffle=True)
+    train_dataloader = DataLoader(train_dataset, num_workers=0, batch_size=50, shuffle=True)
     valid_dataloader = DataLoader(valid_dataset, num_workers=0, batch_size=1)
     test_dataloader = DataLoader(test_dataset, num_workers=0, batch_size=1)
 
@@ -44,7 +45,15 @@ if __name__ == '__main__':
     data_root = '../data/'
     dataloader = get_dataloader(mean_std_path, data_root)
 
-    for index, (data, label, rot_labels) in enumerate(dataloader['train']):
-        print(data.shape, label, rot_labels)
-        if index == 2:
-            break
+    # for index, (data, label, rot_labels) in enumerate(dataloader['train']):
+    #     print(data.shape, label, rot_labels)
+    #     if index == 2:
+    #         break
+    torch.set_printoptions(precision=2, threshold=100000, linewidth=100000)
+    for index, (data, label) in enumerate(dataloader['valid']):
+        data = data.squeeze(1)
+        data_rot3 = torch.rot90(data, 3, [1, 2])
+        # print(data.shape, data_rot3.shape)
+        print(label)
+        # if index < 1:
+        #     break

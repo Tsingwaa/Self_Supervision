@@ -49,6 +49,7 @@ class MnistDataset(Dataset):
 
         ori_image = self._images[self._stage][index]
         label = self._labels[self._stage][index]
+
         if self._stage == 'train':  # 训练集输出旋转的label和旋转的标签
             rot_label = randint(0, 3)
             if rot_label == 0:
@@ -70,6 +71,7 @@ class MnistDataset(Dataset):
 
         else:  # 验证集和测试集输出原图和原类别
             output_img = ori_image
+            # print(output_img.shape)
             output_label = label
 
             if self._transforms is not None:
@@ -136,9 +138,10 @@ if __name__ == "__main__":
         t.Normalize((0.1307,), (0.3081,)),
     ])
     root = r'..\data\\'
+    torch.set_printoptions(precision=2, linewidth=100000, threshold=100000)
     # 创建 dataset
     train_dataset = MnistDataset(root, transforms=transfms, stage='train')
     valid_dataset = MnistDataset(root, transforms=transfms, stage='valid')
     test_dataset = MnistDataset(root, transforms=transfms, stage='test')
 
-    print(train_dataset[0][0])
+    print(valid_dataset[1][1])

@@ -68,12 +68,11 @@ def train():
         pred_list = []
         label_list = []
         total_loss = 0.0
-        class_loss = [0 for i in range(8)]
+        # class_loss = [0 for i in range(8)]
 
         for batch_idx, (data, label, tgt) in tqdm(enumerate(loader['train'])):
             # 收集rot_label序列
-            label_list.extend(tgt)
-
+            label_list.extend(label)
             data, tgt = data.cuda(), tgt.cuda()
             # print(label, tgt)
 
@@ -119,7 +118,7 @@ def train():
         tr_cls_recall, tr_cls_precision = cal_recall_precision(conf_mat, True, [i for i in range(8)])
 
         # 每几个epoch结束，进行测试调节优化，
-        if epoch % 5 == 0:
+        if epoch % 5 != 0:
             valid(model, loader['valid'])
 
         recent_recall_list.append(np.mean(tr_cls_recall))
@@ -129,8 +128,8 @@ def train():
         if epoch % 50 == 0:
             if recent_recall_list[4] < recent_recall_list[3] & recent_recall_list[4] < recent_recall_list[2] \
                     & recent_recall_list[4] > recent_recall_list[1] & recent_recall_list[4] > recent_recall_list[0]:
-                save_path = './backup/model/'
-                save_model(model, opt, epoch, recent_recall_list[4], save_path)
+                save_name = 'resnet18' + str(recent_recall_list[4])
+                save_ckt(model, opt, epoch, recent_recall_list[4], save_name)
 
         scheduler.step(epoch)
 
@@ -140,28 +139,35 @@ def valid(model, val_loader):
     model.eval()
     val_pred_list = []
     val_label_list = []
-    for index, (data, label) in enumerate(val_loader):
-        val_label_list.append(label)
-        labels = torch.stack([label for i in range(4)]).cuda()
-        data = torch.stack([data.cuda(), data.rot90(1, [0, 1]).cuda(),
-                            data.rot90(2, [0, 1]).cuda(), data.rot90(3, [0, 1]).cuda()])
+    with torch.no_grad():
+        for index, (data, label) in enumerate(val_loader):
+            val_label_list.append(label)
+            labels = torch.stack([label for i in range(4)]).cuda()
+            # print(data)
+            data = data.squeeze(1).cuda()
+            data = torch.stack([data.clone(),
+                                data.clone().rot90(1, [1, 2]),
+                                data.clone().rot90(2, [1, 2]),
+                                data.clone().rot90(3, [1, 2])])
 
-        output = model(data, labels, "valid")
+            output = model(data, labels, "valid")
 
-        val_loss = []  # 记录第k张图片的8个loss
-        targets = torch.tensor([0, 1, 2, 3])
-        for idx in range(8):
-            # if k == 1 & idx == 1:
-            #     print(one_out, one_tgt)
-            val_loss.append(cross_entropy(output[idx], targets))
+            val_loss = []  # 记录第k张图片的8个loss
+            targets = torch.tensor([0, 1, 2, 3]).cuda()
+            for idx in range(8):
+                # if k == 1 & idx == 1:
+                #     print(one_out, one_tgt)
+                val_loss.append(cross_entropy(output[idx], targets))
 
-        pred_label = np.argmin(val_loss)
-        val_pred_list.append(pred_label)
+            pred_label = np.argmin(val_loss)
+            val_pred_list.append(pred_label)
 
         val_conf_mat = conf_matrix(val_pred_list, val_label_list, 8, True, [i for i in range(8)])
         cal_recall_precision(val_conf_mat, True, [i for i in range(8)])
 
-        # 求各组分类器的平均loss
+
+def test():
+    load_ckt = True
 
 
 if __name__ == '__main__':

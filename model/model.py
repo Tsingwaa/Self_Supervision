@@ -98,13 +98,17 @@ class Net8FC(nn.Module):
         @Return: the output probability
         """
 
-        fc_dict = {
-            0: self._fc0, 1: self._fc1, 2: self._fc2, 3: self._fc3,
-            4: self._fc4, 5: self._fc5, 6: self._fc6, 7: self._fc7
-        }
+        # fc_dict = {
+        #     0: self._fc0, 1: self._fc1, 2: self._fc2, 3: self._fc3,
+        #     4: self._fc4, 5: self._fc5, 6: self._fc6, 7: self._fc7
+        # }
+
         x = self._conv1(x)
         # print(x.shape)
-        x = self._res_layer(x).view(10, 512)
+        if stage == 'train':
+            x = self._res_layer(x).view(50, 512)
+        else:
+            x = self._res_layer(x).view(4, 512)
         # print(x.shape)
 
         x0 = self._fc0(x)
