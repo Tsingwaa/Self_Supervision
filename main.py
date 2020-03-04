@@ -29,7 +29,7 @@ def train():
     aug_classes = 5
     num_classes = 8
 
-    epochs = 100
+    epochs = 1
 
     torch.set_printoptions(precision=2, threshold=100000, linewidth=10000)
 
@@ -57,7 +57,7 @@ def train():
     criterion_list = [CrossEntropyLoss() for i in range(8)]
 
     # 设置优化器
-    opt = SGD(model.parameters(), lr=1e-2, momentum=0.9)
+    opt = SGD(model.parameters(), lr=1e-3, momentum=0.9)
     scheduler = lr_scheduler.StepLR(opt, step_size=40, gamma=0.1)
 
     model.train()
@@ -73,6 +73,7 @@ def train():
         for batch_idx, (data, label, tgt) in tqdm(enumerate(loader['train'])):
             # 收集rot_label序列
             label_list.extend(label)
+
             data, tgt = data.cuda(), tgt.cuda()
             # print(label, tgt)
 
@@ -126,10 +127,10 @@ def train():
             del recent_recall_list[0]
 
         if epoch % 50 == 0:
-            if recent_recall_list[4] < recent_recall_list[3] & recent_recall_list[4] < recent_recall_list[2] \
-                    & recent_recall_list[4] > recent_recall_list[1] & recent_recall_list[4] > recent_recall_list[0]:
-                save_name = 'resnet18' + str(recent_recall_list[4])
-                save_ckt(model, opt, epoch, recent_recall_list[4], save_name)
+            if recent_recall_list[-1] > best_mean_recall:
+                best_mean_recall = recent_recall_list[-1]
+                save_name = 'resnet18' + str(best_mean_recall)
+                save_ckt(model, opt, epoch, best_mean_recall, save_name)
 
         scheduler.step(epoch)
 
@@ -140,8 +141,8 @@ def valid(model, val_loader):
     val_pred_list = []
     val_label_list = []
     with torch.no_grad():
-        for index, (data, label) in enumerate(val_loader):
-            val_label_list.append(label)
+        for index, (data, label) in tqdm(enumerate(val_loader)):
+            val_label_list.append(int(label))
             labels = torch.stack([label for i in range(4)]).cuda()
             # print(data)
             data = data.squeeze(1).cuda()
@@ -149,7 +150,7 @@ def valid(model, val_loader):
                                 data.clone().rot90(1, [1, 2]),
                                 data.clone().rot90(2, [1, 2]),
                                 data.clone().rot90(3, [1, 2])])
-
+            # print(data[0]-data[1])
             output = model(data, labels, "valid")
 
             val_loss = []  # 记录第k张图片的8个loss
@@ -160,8 +161,10 @@ def valid(model, val_loader):
                 val_loss.append(cross_entropy(output[idx], targets))
 
             pred_label = np.argmin(val_loss)
-            val_pred_list.append(pred_label)
+            val_pred_list.append(int(pred_label))
 
+        print(val_pred_list)
+        print(val_label_list)
         val_conf_mat = conf_matrix(val_pred_list, val_label_list, 8, True, [i for i in range(8)])
         cal_recall_precision(val_conf_mat, True, [i for i in range(8)])
 

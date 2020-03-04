@@ -20,10 +20,8 @@ def cal_acc(output, target):
 
 def conf_matrix(_pred, _true, _class_num, is_print=False, _name_list=None):
     import numpy as np
-    if not isinstance(_pred, list):
-        _pred = _pred.tolist()
-    if not isinstance(_true, list):
-        _true = _true.tolist()
+    _pred = [int(i) for i in _pred]
+    _true = [int(i) for i in _true]
 
     conf_mat = np.zeros((_class_num, _class_num), dtype=np.int)
 
@@ -35,7 +33,6 @@ def conf_matrix(_pred, _true, _class_num, is_print=False, _name_list=None):
         for idx in range(len(_name_list)):
             if idx == 0:
                 print('\n\t' + '\t'.join('p_' + str(i) for i in _name_list))
-
             print('t_' + str(_name_list[idx]) + '\t' + '\t'.join(str(i) for i in conf_mat[idx]))
 
     return conf_mat
@@ -51,9 +48,9 @@ def cal_recall_precision(_conf_mat, is_print=True, _name_list=None):
     class_precision = np.around(class_correct_nums / class_pred_nums, decimals=2)
 
     if is_print & (_name_list is not None):
-        print('\n\t\t\t' + '\t\t'.join(str(i) for i in _name_list))
-        print('recall' + '\t\t' + '\t\t'.join(str(i) for i in class_recall))
-        print('precision' + '\t' + '\t\t'.join(str(i) for i in class_precision))
+        print('\n\t\t\t' + '\t'.join(str(i) for i in _name_list))
+        print('recall' + '\t\t' + '\t'.join(str(i) for i in class_recall))
+        print('precision' + '\t' + '\t'.join(str(i) for i in class_precision))
 
     return class_recall, class_precision
 
