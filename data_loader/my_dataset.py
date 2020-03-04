@@ -49,22 +49,33 @@ class MnistDataset(Dataset):
 
         ori_image = self._images[self._stage][index]
         label = self._labels[self._stage][index]
+        if self._stage == 'train':  # 训练集输出旋转的label和旋转的标签
+            rot_label = randint(0, 3)
+            if rot_label == 0:
+                output_img = np.ascontiguousarray(ori_image)
+            else:
+                output_img = np.ascontiguousarray(np.rot90(ori_image, k=rot_label))
 
-        rot_label = randint(0, 3)
-        if rot_label == 0:
-            rot_image = np.ascontiguousarray(ori_image)
-        else:
-            rot_image = np.ascontiguousarray(np.rot90(ori_image, k=rot_label))
-
-        # np.set_printoptions(linewidth=20000)
-        # print(rot_image)
-
-        if self._transforms is not None:
-            rot_image = self._transforms(rot_image)
-            # rot_image = t.ToTensor()(rot_image)
+            # np.set_printoptions(linewidth=20000)
             # print(rot_image)
 
-        torch.set_printoptions(precision=1, threshold=100000, linewidth=10000)
+            if self._transforms is not None:
+                output_img = self._transforms(output_img)
+                # rot_image = t.ToTensor()(rot_image)
+                # print(rot_image)
+
+            # torch.set_printoptions(precision=2, threshold=100000, linewidth=10000)
+
+            return output_img, label, rot_label
+
+        else:  # 验证集和测试集输出原图和原类别
+            output_img = ori_image
+            output_label = label
+
+            if self._transforms is not None:
+                output_img = self._transforms(output_img)
+
+            return output_img, output_label
 
         # if self._transforms is not None:
         #     ori_image = self._transforms(ori_image)
@@ -112,8 +123,6 @@ class MnistDataset(Dataset):
         #         # out_label.append(self._labels[index] * 4 + rot_times)
 
         # 如果 transform 不为 None，则进行 transform 操作
-
-        return rot_image, label, rot_label
 
     def __len__(self):
         return len(self._labels[self._stage])
