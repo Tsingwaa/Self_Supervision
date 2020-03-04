@@ -125,14 +125,14 @@ class Net8FC(nn.Module):
             output = self._softmax(output)
             # 此时输出为一行概率
         else:
-            x0 = self._softmax(x0)
-            x1 = self._softmax(x1)
-            x2 = self._softmax(x2)
-            x3 = self._softmax(x3)
-            x4 = self._softmax(x4)
-            x5 = self._softmax(x5)
-            x6 = self._softmax(x6)
-            x7 = self._softmax(x7)
+            # x0 = self._softmax(x0)
+            # x1 = self._softmax(x1)
+            # x2 = self._softmax(x2)
+            # x3 = self._softmax(x3)
+            # x4 = self._softmax(x4)
+            # x5 = self._softmax(x5)
+            # x6 = self._softmax(x6)
+            # x7 = self._softmax(x7)
             # Crossentropy前面无需加softmax层
             output = [x0, x1, x2, x3, x4, x5, x6, x7]
 

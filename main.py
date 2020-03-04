@@ -58,7 +58,7 @@ def train():
 
     # 设置优化器
     opt = SGD(model.parameters(), lr=1e-2, momentum=0.9)
-    scheduler = lr_scheduler.StepLR(opt, step_size=40, gamma=0.5)
+    scheduler = lr_scheduler.StepLR(opt, step_size=30, gamma=0.5)
 
     model.train()
     best_mean_recall = 0.0
@@ -126,7 +126,7 @@ def train():
         if epoch > 5:
             del recent_recall_list[0]
 
-        if epoch % 50 == 0:
+        if epoch > 100:
             if recent_recall_list[-1] > best_mean_recall:
                 best_mean_recall = recent_recall_list[-1]
                 save_name = 'resnet18' + str(best_mean_recall)
@@ -170,6 +170,8 @@ def valid(model, val_loader):
 
 
 def get_threshold():
+    from data_loader.my_dataset import MnistDataset
+
     aug_classes = 5
     num_classes = 8
 
@@ -187,8 +189,11 @@ def get_threshold():
     # model = Net1FC(copy_resnet18, all_classes).cuda()
     model = Net8FC(copy_resnet18, num_classes, aug_classes).cuda()
 
-    path = ''
+    path = './backup/models/'
     ckt = torch.load(path)
+    model.load_state_dict(ckt['model'])
+
+    each_loss = []
 
 
 def test():
