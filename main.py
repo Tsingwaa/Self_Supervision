@@ -1,11 +1,3 @@
-"""
-@Author: Tsingwaa Tsang
-@Date: 2020-02-16 22:25:05
-@LastEditors: Tsingwaa Tsang
-@LastEditTime: 2020-02-16 22:25:05
-@Description: Null
-"""
-
 import os
 from copy import deepcopy
 
@@ -20,7 +12,7 @@ from data_loader.my_dataloader import get_dataloader
 from model.model import Net8FC
 from model.metric import *
 
-os.environ["CUDA_kVISIBLE_DEVICES"] = "0"
+os.environ["CUDA_kVISIBLE_DEVICES"] = "7"
 
 
 def train():
