@@ -164,7 +164,14 @@ def valid(model, val_loader):
         cal_recall_precision(val_conf_mat, True, [i for i in range(8)])
 
 
-def get_threshold(ckt_path):
+def get_threshold(ckt_path, threshold_nums, percentage):
+    """this function only get crossentropy threshold, rather get the pred label or others.
+
+    :param ckt_path:  the save path of checkpoints
+    :param threshold_nums:
+    :param percentage: select the percentage of loss to compute the mean loss
+    :return: crossentropy threshold
+    """
     aug_classes = 5
     num_classes = 8
     torch.set_printoptions(precision=2, threshold=100000, linewidth=10000)
@@ -179,20 +186,19 @@ def get_threshold(ckt_path):
     # model = Net1FC(copy_resnet18, all_classes).cuda()
     model = Net8FC(copy_resnet18, num_classes, aug_classes).cuda()
 
-    path = './backup/models/resnet180.09625'
-    ckt = torch.load(path)
+    # ckt_path = './backup/models/resnet180.09625'
+    ckt = torch.load(ckt_path)
     model.load_state_dict(ckt['model'])
 
     model.eval()
 
     loss_list = [[] for i in range(8)]
-    _pred_list = []
-    _label_list = []
+    # _pred_list = []
+    # _label_list = []
     with torch.no_grad():
         for index, (data, label) in tqdm(enumerate(loader['threshold'])):
-            _label_list.append(int(label))
+            # _label_list.append(int(label))
             labels = torch.tensor([label for i in range(4)]).cuda()
-            # print(data)
             data = data.squeeze(1).cuda()
             data = torch.stack([data.clone(),
                                 data.clone().rot90(1, [1, 2]),
@@ -201,22 +207,89 @@ def get_threshold(ckt_path):
 
             output = model(data, labels, "valid")
 
-            val_loss = []  # 记录第k张图片的8个loss
             targets = torch.tensor([0, 1, 2, 3]).cuda()
+            loss_list[label].append(cross_entropy(output[label], targets).item() / 4.0)
+
+            # pred_label = np.argmin(val_loss)
+            # _pred_list.append(int(pred_label))
+
+        # val_conf_mat = conf_matrix(_pred_list, _label_list, 8, True, [i for i in range(8)])
+        # cal_recall_precision(val_conf_mat, True, [i for i in range(8)])
+
+        print(loss_list)
+
+        threshold = []
+        if threshold_nums == 'multi':
+            # 若各分类器求一个阈值
+            for i in range(8):
+                length = len(loss_list[i])
+                threshold.append(np.mean(loss_list[i].sort()[:length * percentage]))
+
+        elif threshold_nums == 1:
+            # 若所有分类器求一个阈值
+            loss_list_in_one = []
+            for loss in loss_list:
+                loss_list_in_one.extend(loss)
+            length = len(loss_list_in_one)
+            threshold = np.mean(loss_list_in_one.sort()[:length * percentage])
+
+        print("The threshold is:", threshold)
+
+        return threshold
+
+
+def test(ckt_path, threshold):
+    aug_classes = 5
+    num_classes = 8
+    torch.set_printoptions(precision=2, threshold=100000, linewidth=10000)
+
+    # get dataloader
+    mean_std_path = './data/mean_std.json'
+    data_root = './data/'
+    # loader dict:'train','valid', 'test'
+    loader = get_dataloader(mean_std_path, data_root)
+
+    copy_resnet18 = deepcopy(resnet18(pretrained=False))
+    # model = Net1FC(copy_resnet18, all_classes).cuda()
+    model = Net8FC(copy_resnet18, num_classes, aug_classes).cuda()
+
+    # ckt_path = './backup/models/resnet180.09625'
+    ckt = torch.load(ckt_path)
+    model.load_state_dict(ckt['model'])
+
+    model.eval()
+    with torch.no_grad():
+        test_labels = []
+        true_labels = []
+        for index, (data, label) in tqdm(enumerate(loader['test'])):
+            true_labels.append(label)
+
+            # _label_list.append(int(label))
+            labels = torch.tensor([label for i in range(4)]).cuda()
+            data = data.squeeze(1).cuda()
+            data = torch.stack([data.clone(),
+                                data.clone().rot90(1, [1, 2]),
+                                data.clone().rot90(2, [1, 2]),
+                                data.clone().rot90(3, [1, 2])])
+
+            output = model(data, labels, "valid")
+            targets = torch.tensor([0, 1, 2, 3]).cuda()
+
+            test_loss = torch.zeros(8).cuda()
             for idx in range(8):
-                val_loss.append(cross_entropy(output[idx], targets))
+                test_loss[idx] = cross_entropy(output[idx], targets).item()
+                if isinstance(threshold, list):
+                    this_threshold = threshold[idx]
+                else:
+                    this_threshold = threshold
+                if test_loss[idx] <= threshold:
+                    test_labels.append(idx)
+                    break
+                if idx == 7:
+                    test_labels.append(8)
 
-            pred_label = np.argmin(val_loss)
-            _pred_list.append(int(pred_label))
-
-        # print(val_pred_list)
-        # print(val_label_list)
-        val_conf_mat = conf_matrix(_pred_list, _label_list, 8, True, [i for i in range(8)])
-        cal_recall_precision(val_conf_mat, True, [i for i in range(8)])
-
-
-def test():
-    pass
+            test_conf_mat = conf_matrix(test_labels, true_labels, True, _name_list=[i for i in range(9)])
+            cal_recall_precision(test_conf_mat, True, _name_list=[i for i in range(9)])
 
 
 if __name__ == '__main__':
