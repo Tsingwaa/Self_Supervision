@@ -9,8 +9,8 @@ from torchvision.models import resnet18
 from tqdm import tqdm
 
 from data_loader.my_dataloader import get_dataloader
-from model.model import Net8FC
 from model.metric import *
+from model.model import Net8FC
 
 os.environ["CUDA_kVISIBLE_DEVICES"] = "7"
 
@@ -52,15 +52,17 @@ def train():
     opt = SGD(model.parameters(), lr=1e-2, momentum=0.9)
     scheduler = lr_scheduler.StepLR(opt, step_size=30, gamma=0.5)
 
-    model.train()
     best_mean_recall = 0.0
     recent_recall_list = []
     for epoch in range(1, epochs + 1):
+        model.train()
         print('\n++++++++++++++++++++++++++++++++++ [ EPOCH {} ] ++++++++++++++++++++++++++++++++++\n'.format(epoch))
+        print("learning rate:", model.optimizer.state_dict()['param_group'][0]['lr'])
+
         pred_list = []
         label_list = []
         total_loss = 0.0
-        # class_loss = [0 for i in range(8)]
+        # class_loss = [0 for i in range(8)]:wq
 
         for batch_idx, (data, label, tgt) in tqdm(enumerate(loader['train'])):
             # 收集rot_label序列
@@ -107,12 +109,10 @@ def train():
 
             opt.step()
 
-        conf_mat = conf_matrix(pred_list, label_list, 8, True, [i for i in range(8)])
-        tr_cls_recall, tr_cls_precision = cal_recall_precision(conf_mat, True, [i for i in range(8)])
+        conf_mat = conf_matrix(pred_list, label_list, 8, False, [i for i in range(8)])
+        tr_cls_recall, tr_cls_precision = cal_recall_precision(conf_mat, False, [i for i in range(8)])
 
         # 每几个epoch结束，进行测试调节优化，
-        if epoch % 10 == 0:
-            valid(model, loader['valid'])
 
         recent_recall_list.append(np.mean(tr_cls_recall))
         if epoch > 5:
@@ -126,6 +126,9 @@ def train():
 
         scheduler.step(epoch)
 
+        if epoch % 10 == 0:
+            valid(model, loader['valid'])
+
 
 def valid(model, val_loader):
     print('\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Validation process...')
@@ -135,7 +138,7 @@ def valid(model, val_loader):
     with torch.no_grad():
         for index, (data, label) in tqdm(enumerate(val_loader)):
             val_label_list.append(int(label))
-            labels = torch.stack([label for i in range(4)]).cuda()
+            labels = torch.tensor([label for i in range(4)]).cuda()
             # print(data)
             data = data.squeeze(1).cuda()
             data = torch.stack([data.clone(),
@@ -161,14 +164,9 @@ def valid(model, val_loader):
         cal_recall_precision(val_conf_mat, True, [i for i in range(8)])
 
 
-def get_threshold():
-    from data_loader.my_dataset import MnistDataset
-
+def get_threshold(ckt_path):
     aug_classes = 5
     num_classes = 8
-
-    epochs = 300
-
     torch.set_printoptions(precision=2, threshold=100000, linewidth=10000)
 
     # get dataloader
@@ -181,11 +179,40 @@ def get_threshold():
     # model = Net1FC(copy_resnet18, all_classes).cuda()
     model = Net8FC(copy_resnet18, num_classes, aug_classes).cuda()
 
-    path = './backup/models/'
+    path = './backup/models/resnet180.09625'
     ckt = torch.load(path)
     model.load_state_dict(ckt['model'])
 
-    each_loss = []
+    model.eval()
+
+    loss_list = [[] for i in range(8)]
+    _pred_list = []
+    _label_list = []
+    with torch.no_grad():
+        for index, (data, label) in tqdm(enumerate(loader['threshold'])):
+            _label_list.append(int(label))
+            labels = torch.tensor([label for i in range(4)]).cuda()
+            # print(data)
+            data = data.squeeze(1).cuda()
+            data = torch.stack([data.clone(),
+                                data.clone().rot90(1, [1, 2]),
+                                data.clone().rot90(2, [1, 2]),
+                                data.clone().rot90(3, [1, 2])])
+
+            output = model(data, labels, "valid")
+
+            val_loss = []  # 记录第k张图片的8个loss
+            targets = torch.tensor([0, 1, 2, 3]).cuda()
+            for idx in range(8):
+                val_loss.append(cross_entropy(output[idx], targets))
+
+            pred_label = np.argmin(val_loss)
+            _pred_list.append(int(pred_label))
+
+        # print(val_pred_list)
+        # print(val_label_list)
+        val_conf_mat = conf_matrix(_pred_list, _label_list, 8, True, [i for i in range(8)])
+        cal_recall_precision(val_conf_mat, True, [i for i in range(8)])
 
 
 def test():
@@ -193,4 +220,5 @@ def test():
 
 
 if __name__ == '__main__':
+    os.environ["CUDA_kVISIBLE_DEVICES"] = "7"
     train()

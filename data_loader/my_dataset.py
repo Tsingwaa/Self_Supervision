@@ -33,11 +33,13 @@ class MnistDataset(Dataset):
 
         self._images = {
             "train": self._tr_images,
+            "threshold": self._tr_images,
             "valid": self._val_images,
             "test": self._ts_images,
         }
         self._labels = {
             "train": self._tr_labels,
+            "threshold": self._tr_labels,
             "valid": self._val_labels,
             "test": self._ts_labels,
         }

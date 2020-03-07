@@ -122,7 +122,7 @@ class Net8FC(nn.Module):
 
         if is_concate:
             output = torch.cat([x0, x1, x2, x3, x4, x5, x6, x7], 1)  # 横向拼接为一行
-            output = self._softmax(output)
+            # output = self._softmax(output)
             # 此时输出为一行概率
         else:
             # x0 = self._softmax(x0)

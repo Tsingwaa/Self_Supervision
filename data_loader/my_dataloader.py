@@ -28,16 +28,21 @@ def get_dataloader(_mean_std_path, _data_root):
 
     # 创建 dataset
     train_dataset = MnistDataset(_data_root, transforms=transfms, stage='train')
+    train_dataset_for_threshold = MnistDataset(_data_root, transforms=transfms, stage='threshold')
     valid_dataset = MnistDataset(_data_root, transforms=transfms, stage='valid')
     test_dataset = MnistDataset(_data_root, transforms=transfms, stage='test')
 
     # print(train_dataset[0])
 
     train_dataloader = DataLoader(train_dataset, num_workers=0, batch_size=100, shuffle=True)
+    train_dataloader_threshold = DataLoader(train_dataset_for_threshold, num_workers=0, batch_size=1)
     valid_dataloader = DataLoader(valid_dataset, num_workers=0, batch_size=1)
     test_dataloader = DataLoader(test_dataset, num_workers=0, batch_size=1)
 
-    return {'train': train_dataloader, 'valid': valid_dataloader, 'test': test_dataloader}
+    return {'train': train_dataloader,
+            'threshold': train_dataloader_threshold,
+            'valid': valid_dataloader,
+            'test': test_dataloader, }
 
 
 if __name__ == '__main__':

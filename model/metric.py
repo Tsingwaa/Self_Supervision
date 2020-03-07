@@ -58,7 +58,7 @@ def cal_recall_precision(_conf_mat, is_print=True, _name_list=None):
 def save_ckt(model, opt, epoch, best_mean_recall, save_name):
     print('Saving the state of  model and optimizer...')
     save_dir = r'./backup/models/'
-    save_path = save_dir + save_name
+    save_path = save_dir + '_' + save_name
     torch.save({
         "model": model.state_dict(),
         "epoch": epoch,
