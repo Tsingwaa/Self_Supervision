@@ -1,5 +1,6 @@
 import os
 from copy import deepcopy
+from datetime import datetime
 
 import numpy as np
 from torch.nn import CrossEntropyLoss
@@ -49,7 +50,7 @@ def train():
     criterion_list = [CrossEntropyLoss() for i in range(8)]
 
     # 设置优化器
-    opt = SGD(model.parameters(), lr=1e-2, momentum=0.9)
+    opt = SGD(model.parameters(), lr=1e-3, momentum=0.9)
     scheduler = lr_scheduler.StepLR(opt, step_size=30, gamma=0.5)
 
     best_mean_recall = 0.0
@@ -57,7 +58,7 @@ def train():
     for epoch in range(1, epochs + 1):
         model.train()
         print('\n++++++++++++++++++++++++++++++++++ [ EPOCH {} ] ++++++++++++++++++++++++++++++++++\n'.format(epoch))
-        print("learning rate:", model.optimizer.state_dict()['param_group'][0]['lr'])
+        # print("learning rate:", model.state_dict()['param_group'][0]['lr'])
 
         pred_list = []
         label_list = []
@@ -120,8 +121,10 @@ def train():
 
         if epoch > 100:
             if recent_recall_list[-1] > best_mean_recall:
-                best_mean_recall = recent_recall_list[-1]
-                save_name = 'resnet18' + str(best_mean_recall)
+                best_mean_recall = np.around(recent_recall_list[-1], decimals=2)
+
+                now_time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+                save_name = 'resnet18_' + str(best_mean_recall) + '_' + now_time + '.pth'
                 save_ckt(model, opt, epoch, best_mean_recall, save_name)
 
         scheduler.step(epoch)
